@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { 
   useLearning,
@@ -13,6 +13,10 @@ import {
 } from '@/features/learning/store/useLearning';
 import { IslandCard } from '@/features/learning/components/IslandCard';
 import { ProgressBar } from '@/features/learning/components/ProgressBar';
+import { HeroSection } from '@/features/dashboard/components/HeroSection';
+import { ProgressCards } from '@/features/dashboard/components/ProgressCards';
+import { NextGoalCard } from '@/features/dashboard/components/NextGoalCard';
+import { StreakWidget } from '@/features/dashboard/components/StreakWidget';
 
 export function StudentPage() {
   const { state, dispatch } = useLearning();
@@ -69,123 +73,27 @@ export function StudentPage() {
   return (
     <div className="w-full max-w-5xl">
       {/* Hero Dashboard Section */}
-      <Card variant="student" padding="lg" className="mb-8 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          {/* User Avatar & Name */}
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-3xl shadow-lg">
-              🧙
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-[var(--color-student-text)]">
-                {user.name}
-              </h1>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-medium">
-                  Level {xpProgress.currentLevel}
-                </span>
-                <span>•</span>
-                <span>Explorer</span>
-              </div>
-            </div>
-          </div>
-
-          {/* XP Progress */}
-          <div className="flex-1 w-full md:w-auto">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-600">XP Progress</span>
-              <span className="text-sm font-bold text-[var(--color-student-primary)]">
-                {totalXP} / {xpProgress.nextLevelXP}
-              </span>
-            </div>
-            <ProgressBar 
-              progress={xpProgress.progressPercent} 
-              variant="student"
-              height="md"
-            />
-            <div className="text-xs text-gray-500 mt-1 text-center">
-              {xpProgress.xpNeeded} XP to Level {xpProgress.currentLevel + 1}
-            </div>
-          </div>
-
-          {/* Streak Badge */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-orange-100 to-red-100 rounded-xl">
-            <div className="text-3xl">🔥</div>
-            <div>
-              <div className="text-2xl font-bold text-orange-600">{streak}</div>
-              <div className="text-xs text-orange-700">Day Streak</div>
-            </div>
-          </div>
-        </div>
-      </Card>
+      <HeroSection
+        userName={user.name}
+        currentLevel={xpProgress.currentLevel}
+        totalXP={totalXP}
+        nextLevelXP={xpProgress.nextLevelXP}
+        xpNeeded={xpProgress.xpNeeded}
+        progressPercent={xpProgress.progressPercent}
+        streak={streak}
+      />
 
       {/* Stats Dashboard */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-        {/* Level Card */}
-        <Card variant="student" padding="md" className="text-center">
-          <div className="text-3xl mb-2">🎖️</div>
-          <div className="text-3xl font-bold text-[var(--color-student-primary)]">
-            {xpProgress.currentLevel}
-          </div>
-          <div className="text-sm text-[var(--color-student-text)] opacity-70">
-            Level
-          </div>
-          <div className="mt-2">
-            <ProgressBar 
-              progress={xpProgress.progressPercent} 
-              variant="student"
-              height="sm"
-            />
-          </div>
-        </Card>
-
-        {/* XP Card */}
-        <Card variant="student" padding="md" className="text-center">
-          <div className="text-3xl mb-2">⭐</div>
-          <div className="text-3xl font-bold text-[var(--color-student-primary)]">
-            {totalXP}
-          </div>
-          <div className="text-sm text-[var(--color-student-text)] opacity-70">
-            Total XP
-          </div>
-          <div className="text-xs text-[var(--color-student-text)] opacity-50 mt-1">
-            {xpProgress.xpNeeded} to Lv.{xpProgress.currentLevel + 1}
-          </div>
-        </Card>
-
-        {/* Progress Card */}
-        <Card variant="student" padding="md" className="text-center">
-          <div className="text-3xl mb-2">📈</div>
-          <div className="text-3xl font-bold text-[var(--color-student-secondary)]">
-            {totalProgress}%
-          </div>
-          <div className="text-sm text-[var(--color-student-text)] opacity-70">
-            Progress
-          </div>
-        </Card>
-
-        {/* Islands Card */}
-        <Card variant="student" padding="md" className="text-center">
-          <div className="text-3xl mb-2">🏝️</div>
-          <div className="text-3xl font-bold text-[var(--color-student-accent)]">
-            {completedIslands}/{islands.length}
-          </div>
-          <div className="text-sm text-[var(--color-student-text)] opacity-70">
-            Islands
-          </div>
-        </Card>
-
-        {/* Steps Card */}
-        <Card variant="student" padding="md" className="text-center">
-          <div className="text-3xl mb-2">👣</div>
-          <div className="text-3xl font-bold text-yellow-500">
-            {totalStepsCompleted}
-          </div>
-          <div className="text-sm text-[var(--color-student-text)] opacity-70">
-            Steps
-          </div>
-        </Card>
-      </div>
+      <ProgressCards
+        currentLevel={xpProgress.currentLevel}
+        totalXP={totalXP}
+        xpNeeded={xpProgress.xpNeeded}
+        progressPercent={xpProgress.progressPercent}
+        totalProgress={totalProgress}
+        completedIslands={completedIslands}
+        totalIslands={islands.length}
+        totalStepsCompleted={totalStepsCompleted}
+      />
 
       {/* Engagement & Goals Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -209,56 +117,10 @@ export function StudentPage() {
         </Card>
 
         {/* Next Goal */}
-        <Card variant="student" padding="lg" className="bg-gradient-to-br from-purple-50 to-pink-50">
-          <h3 className="text-sm font-semibold text-gray-500 mb-3">🎯 Next Goal</h3>
-          {nextGoal ? (
-            <div>
-              <div className="text-lg font-bold text-purple-700 mb-2">
-                Unlock {nextGoal.name}
-              </div>
-              <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-600">Progress</span>
-                <span className="font-medium text-purple-600">
-                  {nextGoal.current}/{nextGoal.target} lessons
-                </span>
-              </div>
-              <ProgressBar 
-                progress={nextGoal.target > 0 ? (nextGoal.current / nextGoal.target) * 100 : 0} 
-                variant="student"
-                height="sm"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Complete {Math.max(0, nextGoal.target - nextGoal.current)} more lessons to unlock!
-              </p>
-            </div>
-          ) : (
-            <div className="text-center py-4">
-              <div className="text-3xl mb-2">🏆</div>
-              <div className="text-sm text-gray-600">All islands unlocked!</div>
-            </div>
-          )}
-        </Card>
+        <NextGoalCard nextGoal={nextGoal} />
 
-        {/* Streak Warning / Motivation */}
-        <Card variant="student" padding="lg" className={`bg-gradient-to-br ${streak > 0 ? 'from-orange-50 to-red-50' : 'from-gray-50 to-slate-50'}`}>
-          <h3 className="text-sm font-semibold text-gray-500 mb-3">🔥 Streak Status</h3>
-          <div className="text-center">
-            <div className="text-5xl mb-2">{streak > 0 ? '🔥' : '💤'}</div>
-            <div className="text-3xl font-bold text-orange-500 mb-1">
-              {streak} {streak === 1 ? 'day' : 'days'}
-            </div>
-            <p className="text-sm text-gray-600">
-              {streak > 0 
-                ? 'Amazing! Keep your streak alive!'
-                : 'Start learning to begin your streak!'}
-            </p>
-            {streak > 0 && (
-              <div className="mt-3 text-xs text-orange-600 font-medium">
-                ⚠️ Don't break your streak!
-              </div>
-            )}
-          </div>
-        </Card>
+        {/* Streak Widget */}
+        <StreakWidget streak={streak} />
       </div>
 
       {/* Missions List */}
