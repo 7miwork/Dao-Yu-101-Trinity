@@ -43,17 +43,22 @@ export function IslandCard({ island, lessons, onLessonClick }: IslandCardProps) 
     return !state.progress[previousLessonId]?.completed;
   };
   
+  // Determine island state
+  const isCompleted = progressPercentage === 100;
+  
   return (
     <div 
       className={`
-        rounded-2xl p-6 shadow-lg transition-all duration-300
-        ${island.unlocked 
-          ? 'bg-white border-2 border-transparent hover:border-[var(--color-student-primary)]' 
-          : 'bg-gray-100 opacity-75'
+        rounded-2xl p-6 shadow-lg transition-all duration-300 transform
+        ${!island.unlocked 
+          ? 'bg-gray-100 opacity-60 blur-[1px] scale-[0.98]' 
+          : isCompleted
+            ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 shadow-green-100'
+            : 'bg-white border-2 border-transparent hover:border-[var(--color-student-primary)] hover:shadow-xl hover:scale-[1.02]'
         }
       `}
       style={{
-        borderColor: island.unlocked && island.color ? island.color : undefined,
+        borderColor: island.unlocked && island.color && !isCompleted ? island.color : undefined,
       }}
     >
       {/* Island Header */}
@@ -61,14 +66,24 @@ export function IslandCard({ island, lessons, onLessonClick }: IslandCardProps) 
         <div className="flex items-center gap-3">
           <div 
             className={`
-              w-12 h-12 rounded-full flex items-center justify-center text-2xl
-              ${island.unlocked ? 'bg-white shadow-md' : 'bg-gray-200'}
+              w-14 h-14 rounded-full flex items-center justify-center text-3xl transition-all duration-300
+              ${!island.unlocked 
+                ? 'bg-gray-200 grayscale' 
+                : isCompleted
+                  ? 'bg-gradient-to-br from-green-400 to-emerald-500 shadow-lg shadow-green-200'
+                  : 'bg-white shadow-md hover:shadow-lg'
+              }
             `}
           >
-            {island.unlocked ? (island.icon || '🏝️') : '🔒'}
+            {!island.unlocked 
+              ? '🔒' 
+              : isCompleted 
+                ? '✅' 
+                : (island.icon || '🏝️')
+            }
           </div>
           <div>
-            <h3 className={`text-lg font-bold ${island.unlocked ? 'text-[var(--color-student-text)]' : 'text-gray-500'}`}>
+            <h3 className={`text-lg font-bold ${island.unlocked ? 'text-[var(--color-student-text)]' : 'text-gray-400'}`}>
               {island.title}
             </h3>
             <p className={`text-sm ${island.unlocked ? 'text-gray-600' : 'text-gray-400'}`}>
@@ -80,14 +95,21 @@ export function IslandCard({ island, lessons, onLessonClick }: IslandCardProps) 
         {/* Status badge */}
         <div 
           className={`
-            px-3 py-1 rounded-full text-xs font-medium
-            ${island.unlocked 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-gray-200 text-gray-500'
+            px-3 py-1 rounded-full text-xs font-medium transition-all
+            ${!island.unlocked 
+              ? 'bg-gray-200 text-gray-500' 
+              : isCompleted
+                ? 'bg-green-500 text-white shadow-md'
+                : 'bg-green-100 text-green-700'
             }
           `}
         >
-          {island.unlocked ? '🔓 Unlocked' : '🔒 Locked'}
+          {!island.unlocked 
+            ? '🔒 Locked' 
+            : isCompleted 
+              ? '✨ Completed' 
+              : '🔓 Unlocked'
+          }
         </div>
       </div>
       
