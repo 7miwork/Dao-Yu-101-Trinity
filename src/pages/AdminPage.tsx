@@ -7,7 +7,11 @@ import {
   useTotalPossibleSteps,
   useIslands,
   useCompletedIslandsCount,
-  useUnlockedIslandsCount
+  useUnlockedIslandsCount,
+  useStreak,
+  useMissionCompletionRate,
+  useCompletedMissionsCount,
+  useTotalMissionsCount
 } from '@/features/learning/store/useLearning';
 import { ProgressBar } from '@/features/learning/components/ProgressBar';
 import { clearState } from '@/features/learning/utils/storage';
@@ -87,6 +91,10 @@ export function AdminPage() {
   const totalPossibleSteps = useTotalPossibleSteps();
   const completedIslands = useCompletedIslandsCount();
   const unlockedIslands = useUnlockedIslandsCount();
+  const streak = useStreak();
+  const missionCompletionRate = useMissionCompletionRate();
+  const completedMissions = useCompletedMissionsCount();
+  const totalMissions = useTotalMissionsCount();
 
   // Calculate system metrics based on learning state
   const totalLessons = lessons.length;
@@ -214,6 +222,64 @@ export function AdminPage() {
             </div>
             <div className="text-xs text-[var(--color-admin-text)] opacity-70">
               Total XP Generated
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Engagement Indicators - spans 2 columns */}
+      <Card variant="admin" padding="md" className="md:col-span-2">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-[var(--color-admin-text)]">
+            📊 Engagement Indicators
+          </h2>
+          <Button variant="ghost" size="sm">
+            Analytics
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-3 rounded-lg bg-[var(--color-admin-bg-light)]">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">🔥</span>
+              <div className="text-2xl font-bold text-orange-500">
+                {streak}
+              </div>
+            </div>
+            <div className="text-xs text-[var(--color-admin-text)] opacity-70">
+              Current Streak
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-[var(--color-admin-bg-light)]">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">🎯</span>
+              <div className="text-2xl font-bold text-green-500">
+                {completedMissions}/{totalMissions}
+              </div>
+            </div>
+            <div className="text-xs text-[var(--color-admin-text)] opacity-70">
+              Missions Completed
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-[var(--color-admin-bg-light)]">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">📈</span>
+              <div className="text-2xl font-bold text-blue-500">
+                {missionCompletionRate}%
+              </div>
+            </div>
+            <div className="text-xs text-[var(--color-admin-text)] opacity-70">
+              Mission Completion Rate
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-[var(--color-admin-bg-light)]">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">🏆</span>
+              <div className="text-2xl font-bold text-purple-500">
+                {completedIslands}
+              </div>
+            </div>
+            <div className="text-xs text-[var(--color-admin-text)] opacity-70">
+              Islands Completed
             </div>
           </div>
         </div>

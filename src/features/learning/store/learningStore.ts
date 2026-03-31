@@ -3,6 +3,8 @@ import { Lesson } from '../models/lesson';
 import { LessonProgress } from '../models/progress';
 import { Island } from '../models/island';
 import { User } from '../../user/model/user';
+import { DailyMission } from '../models/mission';
+import { isSameDay, isYesterday, toISODateString } from '../utils/date';
 
 /**
  * Learning State Interface
@@ -24,6 +26,16 @@ export interface LearningState {
   
   /** All available islands */
   islands: Island[];
+
+  // Retention System
+  /** Current streak count (consecutive days active) */
+  streak: number;
+  
+  /** Last date the user was active (ISO string YYYY-MM-DD) */
+  lastActiveDate: string | null;
+  
+  /** Daily missions for engagement */
+  missions: DailyMission[];
 }
 
 /**
@@ -38,7 +50,12 @@ export type LearningAction =
   | { type: 'RESET_PROGRESS'; payload: { lessonId: string } }
   | { type: 'LOAD_PROGRESS'; payload: LessonProgress[] }
   | { type: 'LOAD_ISLANDS'; payload: Island[] }
-  | { type: 'UNLOCK_ISLAND'; payload: { islandId: string } };
+  | { type: 'UNLOCK_ISLAND'; payload: { islandId: string } }
+  // Retention System Actions
+  | { type: 'UPDATE_STREAK' }
+  | { type: 'UPDATE_MISSIONS'; payload: { lessonCompleted?: boolean; stepsCompleted?: number; xpEarned?: number; islandsCompleted?: number } }
+  | { type: 'COMPLETE_MISSION'; payload: { missionId: string } }
+  | { type: 'LOAD_MISSIONS'; payload: DailyMission[] };
 
 /**
  * Initial State
@@ -52,6 +69,10 @@ export const initialLearningState: LearningState = {
   progress: {},
   totalXP: 0,
   islands: [],
+  // Retention System
+  streak: 0,
+  lastActiveDate: null,
+  missions: [],
 };
 
 /**
@@ -227,6 +248,101 @@ export function learningReducer(
             ? { ...island, unlocked: true }
             : island
         ),
+      };
+    }
+
+    // Retention System Cases
+    case 'UPDATE_STREAK': {
+      const today = new Date();
+      const todayStr = toISODateString(today);
+      
+      // If already updated today, don't update again
+      if (state.lastActiveDate && isSameDay(new Date(state.lastActiveDate), today)) {
+        return state;
+      }
+      
+      let newStreak = 1; // Default to 1 for new day
+      
+      if (state.lastActiveDate) {
+        const lastDate = new Date(state.lastActiveDate);
+        
+        if (isYesterday(lastDate, today)) {
+          // Consecutive day - increment streak
+          newStreak = state.streak + 1;
+        } else if (isSameDay(lastDate, today)) {
+          // Same day - no change
+          return state;
+        }
+        // Otherwise it's a new streak (gap > 1 day), newStreak stays 1
+      }
+      
+      return {
+        ...state,
+        streak: newStreak,
+        lastActiveDate: todayStr,
+      };
+    }
+
+    case 'UPDATE_MISSIONS': {
+      const { lessonCompleted, stepsCompleted, xpEarned, islandsCompleted } = action.payload;
+      
+      const updatedMissions = state.missions.map(mission => {
+        if (mission.completed) return mission;
+        
+        let newProgress = mission.progress;
+        
+        // Update progress based on mission type
+        if (mission.id === 'mission-lessons-2' && lessonCompleted) {
+          newProgress = Math.min(mission.progress + 1, mission.target);
+        } else if (mission.id === 'mission-steps-5' && stepsCompleted) {
+          newProgress = Math.min(mission.progress + stepsCompleted, mission.target);
+        } else if (mission.id === 'mission-xp-100' && xpEarned) {
+          newProgress = Math.min(mission.progress + xpEarned, mission.target);
+        } else if (mission.id === 'mission-island-1' && islandsCompleted) {
+          newProgress = Math.min(mission.progress + islandsCompleted, mission.target);
+        }
+        
+        const isCompleted = newProgress >= mission.target;
+        
+        return {
+          ...mission,
+          progress: newProgress,
+          completed: isCompleted,
+          completedAt: isCompleted && !mission.completed ? new Date().toISOString() : mission.completedAt,
+        };
+      });
+      
+      return {
+        ...state,
+        missions: updatedMissions,
+      };
+    }
+
+    case 'COMPLETE_MISSION': {
+      const { missionId } = action.payload;
+      
+      const mission = state.missions.find(m => m.id === missionId);
+      if (!mission || mission.completed) {
+        return state;
+      }
+      
+      const updatedMissions = state.missions.map(m =>
+        m.id === missionId
+          ? { ...m, completed: true, completedAt: new Date().toISOString() }
+          : m
+      );
+      
+      return {
+        ...state,
+        missions: updatedMissions,
+        totalXP: state.totalXP + mission.rewardXP,
+      };
+    }
+
+    case 'LOAD_MISSIONS': {
+      return {
+        ...state,
+        missions: action.payload,
       };
     }
 

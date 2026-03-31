@@ -294,3 +294,76 @@ export function useXPProgress() {
     progressPercent,
   };
 }
+
+// ============================================
+// Retention System Hooks
+// ============================================
+
+/**
+ * Helper hook to get current streak
+ */
+export function useStreak() {
+  const { state } = useLearning();
+  return state.streak;
+}
+
+/**
+ * Helper hook to get last active date
+ */
+export function useLastActiveDate() {
+  const { state } = useLearning();
+  return state.lastActiveDate;
+}
+
+/**
+ * Helper hook to get all missions
+ */
+export function useMissions() {
+  const { state } = useLearning();
+  return state.missions;
+}
+
+/**
+ * Helper hook to get completed missions count
+ */
+export function useCompletedMissionsCount() {
+  const { state } = useLearning();
+  
+  return useMemo(() => {
+    return state.missions.filter(m => m.completed).length;
+  }, [state.missions]);
+}
+
+/**
+ * Helper hook to get total missions count
+ */
+export function useTotalMissionsCount() {
+  const { state } = useLearning();
+  return state.missions.length;
+}
+
+/**
+ * Helper hook to get mission completion rate
+ */
+export function useMissionCompletionRate() {
+  const { state } = useLearning();
+  
+  return useMemo(() => {
+    if (state.missions.length === 0) return 0;
+    const completed = state.missions.filter(m => m.completed).length;
+    return Math.round((completed / state.missions.length) * 100);
+  }, [state.missions]);
+}
+
+/**
+ * Helper hook to get total XP earned from missions
+ */
+export function useMissionXPEarned() {
+  const { state } = useLearning();
+  
+  return useMemo(() => {
+    return state.missions
+      .filter(m => m.completed)
+      .reduce((sum, m) => sum + m.rewardXP, 0);
+  }, [state.missions]);
+}

@@ -9,7 +9,11 @@ import {
   useTotalPossibleSteps,
   useIslands,
   useCompletedIslandsCount,
-  useUnlockedIslandsCount
+  useUnlockedIslandsCount,
+  useStreak,
+  useMissionCompletionRate,
+  useCompletedMissionsCount,
+  useTotalMissionsCount
 } from '@/features/learning/store/useLearning';
 import { ProgressBar } from '@/features/learning/components/ProgressBar';
 
@@ -77,6 +81,10 @@ export function TeacherPage() {
   const totalSteps = useTotalPossibleSteps();
   const completedIslands = useCompletedIslandsCount();
   const unlockedIslands = useUnlockedIslandsCount();
+  const streak = useStreak();
+  const missionCompletionRate = useMissionCompletionRate();
+  const completedMissions = useCompletedMissionsCount();
+  const totalMissions = useTotalMissionsCount();
 
   // Completion percentage
   const completionPercentage = totalSteps > 0
@@ -143,6 +151,38 @@ export function TeacherPage() {
         </div>
         <div className="text-sm text-[var(--color-teacher-text)] opacity-70">
           Islands Completed
+        </div>
+      </Card>
+
+      {/* Streak Stats */}
+      <Card variant="teacher" padding="lg">
+        <div className="flex items-start justify-between mb-3">
+          <div className="text-3xl">🔥</div>
+          <span className="text-xs px-2 py-1 rounded-full bg-orange-500/20 text-orange-400">
+            avg streak
+          </span>
+        </div>
+        <div className="text-3xl font-bold text-[var(--color-teacher-text)] mb-1">
+          {streak}
+        </div>
+        <div className="text-sm text-[var(--color-teacher-text)] opacity-70">
+          Current Streak
+        </div>
+      </Card>
+
+      {/* Mission Completion Rate */}
+      <Card variant="teacher" padding="lg">
+        <div className="flex items-start justify-between mb-3">
+          <div className="text-3xl">🎯</div>
+          <span className="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">
+            {completedMissions}/{totalMissions}
+          </span>
+        </div>
+        <div className="text-3xl font-bold text-[var(--color-teacher-text)] mb-1">
+          {missionCompletionRate}%
+        </div>
+        <div className="text-sm text-[var(--color-teacher-text)] opacity-70">
+          Mission Completion Rate
         </div>
       </Card>
 

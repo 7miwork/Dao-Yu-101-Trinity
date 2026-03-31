@@ -7,7 +7,9 @@ import {
   useIslands,
   useUnlockedIslandsCount,
   useCompletedIslandsCount,
-  useXPProgress
+  useXPProgress,
+  useStreak,
+  useMissions
 } from '@/features/learning/store/useLearning';
 import { IslandCard } from '@/features/learning/components/IslandCard';
 import { ProgressBar } from '@/features/learning/components/ProgressBar';
@@ -22,6 +24,8 @@ export function StudentPage() {
   const unlockedIslands = useUnlockedIslandsCount();
   const completedIslands = useCompletedIslandsCount();
   const xpProgress = useXPProgress();
+  const streak = useStreak();
+  const missions = useMissions();
 
   // Calculate overall progress
   const totalProgress = lessons.length > 0
@@ -31,6 +35,8 @@ export function StudentPage() {
   // Handle lesson click - simulate completing a step
   const handleLessonClick = (lessonId: string) => {
     dispatch({ type: 'COMPLETE_STEP', payload: { lessonId } });
+    // Update missions progress
+    dispatch({ type: 'UPDATE_MISSIONS', payload: { stepsCompleted: 1 } });
   };
 
   return (
@@ -112,6 +118,93 @@ export function StudentPage() {
           </div>
         </Card>
       </div>
+
+      {/* Streak & Missions Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Streak Card */}
+        <Card variant="student" padding="lg" className="bg-gradient-to-br from-orange-50 to-red-50">
+          <div className="flex items-center gap-4">
+            <div className="text-5xl">🔥</div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-[var(--color-student-text)] mb-1">
+                Daily Streak
+              </h2>
+              <div className="text-4xl font-bold text-orange-500 mb-1">
+                {streak} {streak === 1 ? 'day' : 'days'}
+              </div>
+              <p className="text-sm text-[var(--color-student-text)] opacity-70">
+                {streak > 0 
+                  ? 'Keep it up! Come back tomorrow to continue your streak!'
+                  : 'Start learning today to begin your streak!'}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Missions Summary Card */}
+        <Card variant="student" padding="lg" className="bg-gradient-to-br from-green-50 to-teal-50">
+          <div className="flex items-center gap-4">
+            <div className="text-5xl">🎯</div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-[var(--color-student-text)] mb-1">
+                Daily Missions
+              </h2>
+              <div className="text-4xl font-bold text-green-500 mb-1">
+                {missions.filter(m => m.completed).length}/{missions.length}
+              </div>
+              <p className="text-sm text-[var(--color-student-text)] opacity-70">
+                {missions.filter(m => m.completed).length === missions.length
+                  ? 'All missions completed! Great job!'
+                  : 'Complete missions to earn bonus XP!'}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Missions List */}
+      <Card variant="student" padding="lg" className="mb-8">
+        <h2 className="text-lg font-semibold text-[var(--color-student-text)] mb-4 flex items-center gap-2">
+          🎯 Daily Missions
+        </h2>
+        <div className="space-y-3">
+          {missions.map((mission) => (
+            <div 
+              key={mission.id}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                mission.completed 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-white border-gray-200 hover:border-[var(--color-student-primary)]'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{mission.icon}</span>
+                  <div>
+                    <div className={`font-medium ${mission.completed ? 'text-green-700' : 'text-[var(--color-student-text)]'}`}>
+                      {mission.title}
+                      {mission.completed && <span className="ml-2">✅</span>}
+                    </div>
+                    <div className="text-sm text-[var(--color-student-text)] opacity-70">
+                      Reward: +{mission.rewardXP} XP
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className={`text-lg font-bold ${mission.completed ? 'text-green-500' : 'text-[var(--color-student-primary)]'}`}>
+                    {mission.progress}/{mission.target}
+                  </div>
+                </div>
+              </div>
+              <ProgressBar 
+                progress={(mission.progress / mission.target) * 100} 
+                variant="student"
+                height="sm"
+              />
+            </div>
+          ))}
+        </div>
+      </Card>
 
       {/* Overall Progress Bar */}
       <Card variant="student" padding="lg" className="mb-8">

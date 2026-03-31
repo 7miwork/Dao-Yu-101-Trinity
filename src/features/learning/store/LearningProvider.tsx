@@ -6,6 +6,7 @@ import {
 } from './learningStore';
 import { mockLessons } from '../data/mockLessons';
 import { mockIslands } from '../data/mockIslands';
+import { initializeMissions } from '../data/mockMissions';
 import { createInitialProgress } from '../models/progress';
 import { areUnlockConditionsMet } from '../models/island';
 import { saveState, loadState } from '../utils/storage';
@@ -32,6 +33,8 @@ export function LearningProvider({ children }: LearningProviderProps) {
   useEffect(() => {
     // If we have persisted state with lessons, skip loading mock data
     if (persistedState && persistedState.lessons.length > 0) {
+      // Still update streak on app start
+      dispatch({ type: 'UPDATE_STREAK' });
       return;
     }
     
@@ -45,6 +48,13 @@ export function LearningProvider({ children }: LearningProviderProps) {
     // LOAD_PROGRESS will convert array to Record internally
     const initialProgress = mockLessons.map(lesson => createInitialProgress(lesson.id));
     dispatch({ type: 'LOAD_PROGRESS', payload: initialProgress });
+    
+    // Initialize missions
+    const initialMissions = initializeMissions();
+    dispatch({ type: 'LOAD_MISSIONS', payload: initialMissions });
+    
+    // Update streak on first load
+    dispatch({ type: 'UPDATE_STREAK' });
   }, []);
 
   // Auto-save state to localStorage whenever state changes
